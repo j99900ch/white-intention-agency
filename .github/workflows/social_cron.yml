@@ -1,0 +1,51 @@
+﻿name: White Intention 24/7 Social Automation
+
+on:
+  schedule:
+    # 04:00 UTC = 09:30 AM IST (Slot 0 - Image Post)
+    - cron: '0 4 * * *'
+    # 07:00 UTC = 12:30 PM IST (Slot 1 - Video Reel)
+    - cron: '0 7 * * *'
+    # 10:00 UTC = 03:30 PM IST (Slot 2 - Image Post)
+    - cron: '0 10 * * *'
+    # 13:00 UTC = 06:30 PM IST (Slot 3 - Video Reel)
+    - cron: '0 13 * * *'
+    # 16:00 UTC = 09:30 PM IST (Slot 4 - Image Post)
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+
+jobs:
+  publish_post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine Time Slot
+        id: slot
+        run: |
+          HOUR=$(date -u +"%H")
+          if [ "$HOUR" -ge 3 ] && [ "$HOUR" -lt 6 ]; then
+            echo "SLOT=0" >> $GITHUB_OUTPUT
+          elif [ "$HOUR" -ge 6 ] && [ "$HOUR" -lt 9 ]; then
+            echo "SLOT=1" >> $GITHUB_OUTPUT
+          elif [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 12 ]; then
+            echo "SLOT=2" >> $GITHUB_OUTPUT
+          elif [ "$HOUR" -ge 12 ] && [ "$HOUR" -lt 15 ]; then
+            echo "SLOT=3" >> $GITHUB_OUTPUT
+          else
+            echo "SLOT=4" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Dynamic Content Publisher
+        env:
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_INSTAGRAM_ACCOUNT_ID: ${{ secrets.META_INSTAGRAM_ACCOUNT_ID }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+        run: |
+          python dynamic_social_engine.py ${{ steps.slot.outputs.SLOT }}
