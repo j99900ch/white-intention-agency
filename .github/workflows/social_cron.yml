@@ -2,11 +2,19 @@
 
 on:
   schedule:
-    - cron: "0 4 * * *"
-    - cron: "0 7 * * *"
-    - cron: "0 10 * * *"
-    - cron: "0 13 * * *"
-    - cron: "0 16 * * *"
+    # Shifted to odd minutes to bypass GitHub queue delays
+    # 04:17 UTC = 09:47 AM IST (Slot 0 - Image Post)
+    - cron: "17 4 * * *"
+    # 07:17 UTC = 12:47 PM IST (Slot 1 - Video Reel)
+    - cron: "17 7 * * *"
+    # 10:17 UTC = 03:47 PM IST (Slot 2 - Image Post)
+    - cron: "17 10 * * *"
+    # 13:17 UTC = 06:47 PM IST (Slot 3 - Video Reel)
+    - cron: "17 13 * * *"
+    # 16:17 UTC = 09:47 PM IST (Slot 4 - Image Post)
+    - cron: "17 16 * * *"
+  repository_dispatch:
+    types: [auto-social-post]
   workflow_dispatch:
 
 jobs:
